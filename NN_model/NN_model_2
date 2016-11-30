@@ -1,0 +1,49 @@
+import tensorflow as tf
+import numpy as np
+import random
+#import matplotlib.pyplot as plt
+
+#input data
+
+lorange= 1
+hirange= 10
+amplitude= random.uniform(-10,10)
+t= 10
+random.seed()
+tau=random.uniform(lorange,hirange)
+
+def generate_data(randomsignal):
+    x= np.arange(t)
+    y= amplitude*np.exp(-x/tau)
+    return x, y
+
+
+#tensors for input data
+
+x_input= tf.placeholder(tf.float32, shape=(10,))# t=10
+y_input= tf.placeholder(tf.float32, shape=(10,))
+
+#use 10 neurons-- just one layer for now
+
+weights_1= tf.Variable(tf.truncated_normal([10,10], stddev= .1))
+bias_1= tf.Variable(.1)
+
+output_layer= tf.matmul(tf.reshape(x_input,[1,10]), weights_1) + bias_1
+clipped_output= tf.clip_by_value(output_layer, 1e-37, 1e+37)
+
+mean_squared = tf.reduce_mean(tf.square(y_input - tf.squeeze(clipped_outputai)))
+
+optimizer = tf.train.GradientDescentOptimizer(.1).minimize(mean_squared)
+
+
+#session
+sess= tf.InteractiveSession()
+sess.run(tf.initialize_all_variables())
+
+for i in range(1000):
+    x, y = generate_data(100)
+    sess.run(optimizer, feed_dict={x_input: x, y_input: y})
+
+error = tf.reduce_sum(tf.abs(tf.squeeze(output_layer) - y_input))
+x, y = generate_data(100)
+print('Total Error: ', error.eval(feed_dict={x_input: x, y_input: y}))
